@@ -31,6 +31,24 @@ job-skill-demand-forecasting/
 └─ README.md
 ```
 
+## Workflow / Architecture
+
+```text
+Job Data
+   ↓
+Data Cleaning
+   ↓
+Feature Engineering
+   ↓
+Exploratory Data Analysis
+   ↓
+Forecasting Model (Prophet)
+   ↓
+Visualization (Plotly)
+   ↓
+Streamlit Dashboard
+```
+
 ## Quickstart
 ```
 python -m venv .venv
