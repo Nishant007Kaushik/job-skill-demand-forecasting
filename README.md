@@ -42,7 +42,7 @@ source .venv/bin/activate
 pip install -r requirements.txt
 python scripts/setup_nltk.py   # optional
 
-streamlit run app/app.py
+streamlit run app.py
 ```
 
 ## GitHub

@@ -3,6 +3,7 @@ import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
 from datetime import datetime
+from pathlib import Path
 
 # Import your own modules from src folder
 from src.data_load import load_dataset
@@ -21,8 +22,7 @@ import plotly.express as px  # used for pie charts
 st.set_page_config(page_title="Job Skill Demand Forecasting", page_icon="📈", layout="wide")
 
 # Path to your synthetic dataset
-DATA_PATH = "D:/job-skill-demand-forecasting/data/synthetic_job_postings_2023_2025.csv"
-
+DATA_PATH = str(Path(__file__).parent / "data" / "synthetic_job_postings_2023_2025.csv")
 # ------------------ Data Loading ------------------
 @st.cache_data(show_spinner=False)
 def get_data():
@@ -117,12 +117,12 @@ with tab1:
                  .rename(columns={'Location':'Skill'})),
                 title=f"{skill} Monthly Demand by City (multi-series)"
             ),
-            use_container_width=True
+            width="stretch"
         )
 
     c2.subheader("Industry Split")
     if not ind_df.empty:
-        c2.dataframe(ind_df, use_container_width=True, height=400)
+        c2.dataframe(ind_df, width="stretch", height=400)
 
 # ------------------ Tab 2: Trends ------------------
 with tab2:
@@ -130,10 +130,10 @@ with tab2:
     # Line chart with rolling mean
     ts = skill_counts_monthly(dff, skill)
     ts = rolling_trend(ts, window=3)
-    st.plotly_chart(line_trend(ts, title=f"{skill} — Monthly Demand & 3M Rolling Mean"), use_container_width=True)
+    st.plotly_chart(line_trend(ts, title=f"{skill} — Monthly Demand & 3M Rolling Mean"), width="stretch")
 
     st.subheader("Heatmap by Location")
-    st.plotly_chart(heatmap_by_location(dff, skill), use_container_width=True)
+    st.plotly_chart(heatmap_by_location(dff, skill), width="stretch")
 
 # ------------------ Tab 3: Forecast ------------------
 with tab3:
@@ -145,29 +145,29 @@ with tab3:
         st.plotly_chart(
             forecast_plot(fc[['ds','yhat','yhat_lower','yhat_upper']],
                           title=f"{skill} Forecast (next 6 months)"),
-            use_container_width=True
+            width="stretch"
         )
         st.dataframe(fc.tail(6)[['ds','yhat','yhat_lower','yhat_upper']].rename(columns={'ds':'Month'}),
-                     use_container_width=True)
+                     width="stretch")
     else:
         st.info("Not enough history to forecast. Try widening the date range or pick another skill.")
 
 # ------------------ Tab 4: Salary & Experience ------------------
 with tab4:
     st.subheader(f"Salary by Location — {skill}")
-    st.plotly_chart(salary_box(dff, skill), use_container_width=True)
+    st.plotly_chart(salary_box(dff, skill), width="stretch")
 
     st.subheader("Experience Required — Histogram")
-    st.plotly_chart(experience_hist(dff, skill), use_container_width=True)
+    st.plotly_chart(experience_hist(dff, skill), width="stretch")
 
     st.subheader("Salary Stats")
-    st.dataframe(salary_stats(dff, skill), use_container_width=True)
+    st.dataframe(salary_stats(dff, skill), width="stretch")
 
     st.subheader("Top Companies (Filtered)")
     top_companies = (dff[dff['Skill'].str.lower()==skill.lower()]
                      .groupby('Company').size().reset_index(name='count')
                      .sort_values('count', ascending=False).head(20))
-    st.dataframe(top_companies, use_container_width=True)
+    st.dataframe(top_companies, width="stretch")
 
 # ------------------ Tab 5: Summary (Pie Charts) ------------------
 with tab5:
@@ -178,7 +178,7 @@ with tab5:
     st.subheader("🔥 Top 10 Skills in Current Filter")
     skill_counts = dff['Skill'].value_counts().head(10).reset_index()
     skill_counts.columns = ['Skill', 'Job Postings']
-    st.dataframe(skill_counts, use_container_width=True)
+    st.dataframe(skill_counts, width="stretch")
 
 
 
@@ -187,7 +187,7 @@ with tab5:
         top_jobs = dff['Job_Title'].value_counts().head(5).reset_index()
         top_jobs.columns = ['Job_Title', 'Count']
         fig1 = px.pie(top_jobs, names='Job_Title', values='Count', title='Top 5 Trending Jobs')
-        st.plotly_chart(fig1, use_container_width=True)
+        st.plotly_chart(fig1, width="stretch")
 
     # Pie chart: Top 5 highest paying jobs
     if 'Salary_Mid' in dff.columns and 'Job_Title' in dff.columns:
@@ -196,21 +196,21 @@ with tab5:
                    .head(5).reset_index())
         top_pay.columns = ['Job_Title', 'Median Salary']
         fig2 = px.pie(top_pay, names='Job_Title', values='Median Salary', title='Top 5 Highest Paying Jobs')
-        st.plotly_chart(fig2, use_container_width=True)
+        st.plotly_chart(fig2, width="stretch")
 
     # Pie chart: Top 5 cities by job demand
     if 'Location' in dff.columns:
         top_cities = dff['Location'].value_counts().head(5).reset_index()
         top_cities.columns = ['City', 'Count']
         fig3 = px.pie(top_cities, names='City', values='Count', title='Top 5 Cities by Job Demand')
-        st.plotly_chart(fig3, use_container_width=True)
+        st.plotly_chart(fig3, width="stretch")
 
     # Pie chart: Top 5 companies hiring most
     if 'Company' in dff.columns:
         top_companies = dff['Company'].value_counts().head(5).reset_index()
         top_companies.columns = ['Company', 'Count']
         fig4 = px.pie(top_companies, names='Company', values='Count', title='Top 5 Companies Hiring Most')
-        st.plotly_chart(fig4, use_container_width=True)
+        st.plotly_chart(fig4, width="stretch")
 
 # ------------------ Extra Section: Compare Multiple Skills ------------------
 st.subheader("📊 Compare Multiple Skills")
