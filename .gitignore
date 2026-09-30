@@ -13,3 +13,6 @@ Thumbs.db
 .streamlit/
 ~/.cache/
 cmdstan-*
+.env
+
+.env
