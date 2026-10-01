@@ -16,3 +16,4 @@ cmdstan-*
 .env
 
 .env
+data/raw/
