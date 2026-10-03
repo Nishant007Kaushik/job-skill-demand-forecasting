@@ -66,9 +66,15 @@ st.dataframe(flag.round(1), width="stretch", hide_index=True)
 st.subheader("Monthly postings have no trend")
 monthly = df.groupby(df["date"].dt.to_period("M").astype(str)).size().reset_index(name="postings")
 monthly.columns = ["month", "postings"]
-fig = px.line(monthly, x="month", y="postings", title="Postings per month (synthetic)")
+sparse = monthly["postings"] < 0.5 * monthly["postings"].median()
+fig = px.line(monthly[~sparse], x="month", y="postings", title="Postings per month (synthetic)")
 fig.update_yaxes(rangemode="tozero")
 st.plotly_chart(fig, width="stretch")
+if sparse.any():
+    st.caption(
+        f"The dataset ends on {df['date'].max():%Y-%m-%d}, so the final month "
+        f"({', '.join(monthly.loc[sparse, 'month'])}) is only partly covered and is left out of the chart."
+    )
 
 st.info(
     "Takeaway: the synthetic data is good for demonstrating the pipeline and the forecasting method, "
@@ -83,13 +89,14 @@ st.write(
 )
 st.markdown(
     "- Use USD salaries only. Nearly all salaries were USD.\n"
-    "- Postings labelled HOURLY with a maximum of $1,000 or more were treated as annual figures "
-    "(30 of the 38 salaries above $1M were labelled hourly).\n"
-    "- Keep annual pay between $15,000 and $1,000,000.\n"
+    "- Postings labelled HOURLY with a maximum of \\$1,000 or more were treated as annual figures "
+    "(30 of the 38 salaries above \\$1M were labelled hourly).\n"
+    "- Keep annual pay between \\$15,000 and \\$1,000,000.\n"
     "- Skill and industry tags whose job ID is not in the postings file "
     "(4,711 and 4,712 IDs) were excluded through views.\n"
     "- Blank values are reported as 'Not specified', and a blank remote flag is not treated as on-site."
 )
+
 st.caption(
     "Limitations: a four-week snapshot, US-focused, pay available for under a third of postings, "
     "and the pay cut-offs have not been validated against a source of truth."
